@@ -1,42 +1,50 @@
 import React, { useEffect, useState } from "react";
 
 const Stopwatch = () => {
-  const [time, setTime] = useState(0);
-  const [isRunning, SetIsRunning] = useState(false);
+  const [second, setSecond] = useState(0);
+  const [time, setTime] = useState("0:00");
+  const [timerId, setTimerId] = useState(null);
+
+  const generateTime = () => {
+    const min = Math.floor(second / 60);
+    const sec = second % 60;
+    setTime(`${min}:${sec < 10 ? `0${sec}` : sec}`);
+  };
+
+  const toggle = () => {
+    if (timerId) {
+      clearInterval(timerId);
+      setTimerId(null);
+    } else {
+      const tId = setInterval(() => {
+        setSecond((prevSec) => prevSec + 1);
+      }, 1000);
+      setTimerId(tId);
+    }
+  };
+
+  const reset = () => {
+    if (timerId) {
+      clearInterval(timerId);
+      setTimerId(null);
+    }
+    setSecond(0);
+  };
 
   useEffect(() => {
-    let timer = null;
-    if (!isRunning) {
-      timer = setInterval(() => {
-        setTime((prevTime) => prevTime + 1);
-      }, 1000);
-    } else if (!isRunning && time !== 0) {
-      clearInterval(timer);
-    }
-    return () => clearInterval(timer);
-  }, [isRunning]);
-
-  const handleStartStop = () => {
-    SetIsRunning(!isRunning);
-  };
-
-  const handleReset = () => {
-    SetIsRunning(false);
-    setTime(0);
-  };
-
-  const formatTime = (time) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = time % 60;
-    return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
-  };
+    generateTime();
+  }, [second]);
   return (
-    <div>
+    <section style={{ marginLeft: "1rem" }}>
       <h1>Stopwatch</h1>
-      <div>Time:{formatTime(time)}</div>
-      <button onClick={handleStartStop}>{isRunning ? "Stop" : "Start"}</button>
-      <button onClick={handleReset}>Reset</button>
-    </div>
+      <section style={{ marginTop: "1rem", fontWeight: "500" }}>
+        <div>Time: {time}</div>
+        <div style={{ marginTop: "0.5rem" }}>
+          <button onClick={toggle}>{timerId ? "Stop" : "Start"}</button>
+          <button onClick={reset}>Reset</button>
+        </div>
+      </section>
+    </section>
   );
 };
 
